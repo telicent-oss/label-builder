@@ -42,11 +42,14 @@ def records_from_file() -> list[str]:
 sink = KafkaSink(topic="adapter-demo", broker="localhost:9092")
 adapter = Adapter(target=sink, name="Demo Adapter with Telicent Policy", source_name="Word List MIT")
 
-telicent_policy = {
+data_header = {
     # Telicent policy details...
 }
 
-security_labels = TelicentModel(**telicent_policy).build_security_labels()
+# Validates data header against a model
+data_header_obj =  TelicentModel(**data_header) 
+# Builds labels from data header object
+security_labels = data_header_obj.build_security_labels()
 
 try:
     adapter.run()
@@ -54,11 +57,11 @@ try:
 
     for i, line in enumerate(records_from_file(), start=1):
         record = Record(headers=None, key=i, value=line, raw=None)
-        # TEL key is user defined, in future this might change.
-        record_with_headers = RecordUtils.add_headers(record, [('policyInformation', {'TEL': telicent_policy})])
-        record_with_label_and_policy = RecordUtils.add_headers(record_with_headers,
-                                                               [('Security-Label', security_labels)])
-        adapter.send(record_with_label_and_policy)
+        # The format representing a security policy header is defined at user discretion, code below is an example.
+        record_with_headers = RecordUtils.add_headers(record, [('policyInformation', 
+                                                                {'DH': data_header_obj.model_dump()})])
+        record = RecordUtils.add_headers(record_with_headers, [('Security-Label', security_labels)])
+        adapter.send(record)
 
     adapter.finished()
 except KeyboardInterrupt:
@@ -70,10 +73,6 @@ if __name__ == '__main__':
 
 #### Usage with Automatic Adapters
 
-Automatic adapters are engineered to seamlessly administer a Telicent Policy across all data records they process. 
-Upon instantiation, these adapters apply a predefined policy, specified in the class constructor, uniformly to every record. 
-This ensures consistent policy enforcement and simplifies the management of data security.
-
 ```python
    import json
    from pathlib import Path
@@ -81,9 +80,14 @@ This ensures consistent policy enforcement and simplifies the management of data
    from telicent_lib import AutomaticAdapter, Record
    from telicent_lib.sinks import KafkaSink, Serializers
    
-   policy = {
+   data_header = {
        # Telicent policy details...
    }
+  
+   # Validates data header against a model
+   data_header_obj =  TelicentModel(**data_header) 
+   # Builds labels from data header object
+   security_labels = data_header_obj.build_security_labels()
    
    def read_json_objects(file_path):
        path = Path(file_path)
@@ -95,12 +99,18 @@ This ensures consistent policy enforcement and simplifies the management of data
    
    def generate_records() -> Iterable[Record]:
        for i, record in enumerate(read_json_objects("./demo_data.json")):
-           yield Record(headers=None, key=i, value=record, raw=None)
+           record = Record(headers=None, key=i, value=record, raw=None)
+           
+           if condition:
+               # The format representing a security policy header is defined at user discretion, code below is an example.
+               record_with_headers = RecordUtils.add_headers(record, [('policyInformation', 
+                                                                   {'DH': data_header_obj.model_dump()})])
+               record = RecordUtils.add_headers(record_with_headers, [('Security-Label', security_labels)])
+           yield record
    
    sink = KafkaSink(topic="output-automatic-adapter-demo", broker="localhost:9092", value_serializer=Serializers.to_json)
    adapter = AutomaticAdapter(target=sink, adapter_function=generate_records,
-                              name="Example Automatic Adapter with security policy", source_name="Some file",
-                              policy_information=policy)
+                              name="Example Automatic Adapter with security policy", source_name="Some file")
    
    if __name__ == '__main__':
        adapter.run()
