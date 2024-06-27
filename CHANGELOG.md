@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.1](https://github.com/telicent-oss/label-builder/compare/v0.1.0...v0.1.1) (2024-06-27)
+
+
+### Documentation
+
+* update documentation to reflect recent changes to telicent-lib ([8482299](https://github.com/telicent-oss/label-builder/commit/84822998a0445c672cb9f17742bfc963794948da))
+* update documentation to reflect recent changes to telicent-lib ([#4](https://github.com/telicent-oss/label-builder/issues/4)) ([8482299](https://github.com/telicent-oss/label-builder/commit/84822998a0445c672cb9f17742bfc963794948da))
+
 ## 0.1.0 (2024-05-10)
 
 
