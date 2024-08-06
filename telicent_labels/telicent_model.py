@@ -1,7 +1,11 @@
+import logging
+from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from typing import Annotated
 
-from pydantic import AwareDatetime, BaseModel, PlainSerializer
+from fastapi import APIRouter
+from pydantic import AwareDatetime, BaseModel, PlainSerializer, field_validator
+from telicent_lbapi.rest_service import run_api_service
 
 from telicent_labels.security_labels import SecurityLabelBuilder
 from telicent_labels.telicentv2 import TelicentSecurityLabelsV2
@@ -22,23 +26,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+log = logging.getLogger(__name__)
 
 DEFAULT_OPTIONAL_DT = datetime(2023, 12, 14, 0, 0, 0, tzinfo=timezone.utc)
 SerialisableDt = Annotated[AwareDatetime, PlainSerializer(lambda x: x.isoformat(), return_type=str, when_used="always")]
 
 
-class TelicentMixin(BaseModel):
-
+class TelicentMixin(BaseModel, ABC):
+    @abstractmethod
     def build_security_labels(self):
-        builder = SecurityLabelBuilder()
+        pass
 
-        builder.add(TelicentSecurityLabelsV2.CLASSIFICATION.value, self.classification)
-        builder.add_multiple(TelicentSecurityLabelsV2.PERMITTED_ORGANISATIONS.value, *self.permittedOrgs)
-        builder.add_multiple(TelicentSecurityLabelsV2.PERMITTED_NATIONALITIES.value, *self.permittedNats)
-        builder.add_multiple(TelicentSecurityLabelsV2.AND_GROUPS.value, *self.andGroups)
-        builder.add_multiple(TelicentSecurityLabelsV2.OR_GROUPS.value, *self.orGroups)
-
-        return builder.build()
+    @classmethod
+    def run_api(cls, custom_router: APIRouter | None = None):
+        run_api_service(cls, custom_router=custom_router)
 
 
 class TelicentModel(TelicentMixin):
@@ -61,5 +62,31 @@ class TelicentModel(TelicentMixin):
     dispositionProcess: str | None = None
     dissemination: list[str]
 
+    @field_validator('classification')
+    def non_empty_string(cls, value: str, info):
+        if value.strip() == "":
+            raise ValueError(f"The {info.field_name} field cannot be an empty string.")
+        return value
+
+    @field_validator('permittedOrgs', 'permittedNats', 'orGroups', 'andGroups', 'dataSet',
+                     'authRef', 'dissemination', mode='before')
+    def non_empty_list(cls, value: list[str], info):
+        clean_list = [x for x in value if x]
+        if not clean_list or len(clean_list) == 0:
+            raise ValueError(f"The {info.field_name} field cannot be an empty list.")
+        return value
+
     def build_security_labels(self):
-        return super().build_security_labels()
+        builder = SecurityLabelBuilder()
+
+        builder.add(TelicentSecurityLabelsV2.CLASSIFICATION.value, self.classification)
+        builder.add_multiple(TelicentSecurityLabelsV2.PERMITTED_ORGANISATIONS.value, *self.permittedOrgs)
+        builder.add_multiple(TelicentSecurityLabelsV2.PERMITTED_NATIONALITIES.value, *self.permittedNats)
+        builder.add_multiple(TelicentSecurityLabelsV2.AND_GROUPS.value, *self.andGroups)
+        builder.add_multiple(TelicentSecurityLabelsV2.OR_GROUPS.value, *self.orGroups)
+
+        return builder.build()
+
+    @classmethod
+    def run_api(cls, custom_router: APIRouter | None = None):
+        run_api_service(cls, custom_router=custom_router)
