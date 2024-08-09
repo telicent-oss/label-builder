@@ -9,17 +9,16 @@ security and access policies.
 
 #### Classes 
 
-1. **TelicentMixin Class**: A base model providing the `build_security_labels` method.
-   - `build_security_labels(self)`: Utilizes `SecurityLabelBuilder` and `TelicentSecurityLabelsV2` to construct security labels based on class attributes.
-    
-   The mixin class is designed to enhance the extensibility and versatility of a model. It provides a flexible means to 
-   augment the functionality of the primary model, as well as to offer compatibility and feature support for additional models. 
-   This approach ensures modular and adaptable design, allowing for the seamless integration of extended capabilities or the incorporation of functionalities from other models.
-
-
+1. **TelicentMixin Class**: An abstract base model providing core functionality
+   - `build_security_labels(self)`: An abstract method that must be implemented by
+      subclasses to utilize the SecurityLabelBuilder for constructing security 
+      labels based on model attributes.
+     
+   - `run_api(cls, custom_router: APIRouter | None = None):` A class method to initiate the API service using the 
+      model's configuration, leveraging the provided run_api_service function. 
+      Please refer to [Running model as a service](./model-as-a-service.md)
 2. **TelicentModel Class (inherits TelicentMixin)**: Represents the Telicent policy with various attributes.
-   - Attributes include `identifier`, `classification`, `permittedOrgs`, `permittedNats`, `orGroups`, `andGroups`, and optional fields like `createDate`, `originator`, etc.
-   - `build_security_labels(self)`: Overrides the base method to build security labels specific to this model.
+   - Pro 
 
 
 #### Example: Using Telicent Header Model with Adapter
