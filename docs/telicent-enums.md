@@ -6,6 +6,9 @@ Telicent Security Labels provide enumerations to use with the Security Label Bui
 CORE environment. The system supports multiple and single value labels, 
 as well as complex group logic.
 
+> ### ⚠️ Warning
+> This is conceptual implementation for illustrative purposes built for TelicentModel.
+
 #### Classes and Enums
 
 1. **TelicentSecurityLabelsV1 (Enum)**: Represents a simplified version of the default Telicent model used in the CORE environment.
