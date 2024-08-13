@@ -1,7 +1,8 @@
 import json
 import unittest
+from collections.abc import Iterable
 from datetime import datetime, timezone
-from typing import Iterable, Any
+from typing import Any
 from unittest.mock import patch
 
 from telicent_lib import AutomaticAdapter, Record, RecordUtils
