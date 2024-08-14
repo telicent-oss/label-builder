@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/telicent-oss/label-builder/compare/v0.1.2...v0.1.3) (2024-08-14)
+
+
+### Miscellaneous
+
+* update dependency ([#10](https://github.com/telicent-oss/label-builder/issues/10)) ([beaf53e](https://github.com/telicent-oss/label-builder/commit/beaf53ed34042f7ff70ffd0161e34536f43d9162))
+
 ## [0.1.2](https://github.com/telicent-oss/label-builder/compare/v0.1.1...v0.1.2) (2024-08-09)
 
 
