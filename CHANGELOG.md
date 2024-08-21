@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/telicent-oss/label-builder/compare/v0.1.4...v0.1.5) (2024-08-21)
+
+
+### Miscellaneous
+
+* update min version for label-builder-service ([#14](https://github.com/telicent-oss/label-builder/issues/14)) ([8db639e](https://github.com/telicent-oss/label-builder/commit/8db639ec53ae666299965db610a168408e573842))
+
 ## [0.1.4](https://github.com/telicent-oss/label-builder/compare/v0.1.3...v0.1.4) (2024-08-20)
 
 
