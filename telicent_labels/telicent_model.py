@@ -44,7 +44,7 @@ class TelicentMixin(BaseModel, ABC):
 
 class TelicentModel(TelicentMixin):
     apiVersion: str | None = "v1alpha"
-    specification: str | None = "UKIC v3.0"
+    specification: str | None = "v3.0"
     identifier: str
     classification: str
     permittedOrgs: list[str]
