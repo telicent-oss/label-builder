@@ -1,4 +1,10 @@
 # Changelog
+## 0.1.6 (2024-10-01)
+
+
+### Features
+
+* add initial view of the idh model mixin for label creation ([#18](https://github.com/telicent-oss/label-builder/issues/18)) ([7868e76](https://github.com/telicent-oss/label-builder/commit/7868e764da8c65d333e8c409b5fe6067d2d8945c))
 
 ## [0.1.5](https://github.com/telicent-oss/label-builder/compare/v0.1.4...v0.1.5) (2024-08-21)
 
