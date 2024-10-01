@@ -24,6 +24,7 @@ class TelicentLabelsV1(Enum):
     Representation of simplified Telicent model suitable for SecurityLabelbuilder,
     simplified for the CORE environment
     """
+
     PERMITTED_ORGANISATIONS = security.MultiValueLabel("deployed_organisation", "array")
     PERMITTED_NATIONALITIES = security.MultiValueLabel("nationality", "array")
     CLASSIFICATION = security.SingleValueLabel("clearance", "str")

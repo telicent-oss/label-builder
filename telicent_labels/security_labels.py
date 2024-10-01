@@ -55,7 +55,7 @@ class SingleValueLabel(Label):
 
     def construct(self, *values):
         if len(values) > 1:
-            raise ValueError('SingleValueLabel may only have one value')
+            raise ValueError("SingleValueLabel may only have one value")
         return self.create_label(values[0])
 
 
@@ -124,8 +124,9 @@ class SecurityLabelBuilder(SecurityLabelHelper):
         if trimmed is None or not len(trimmed) >= 2:
             raise ValueError("Valid security label expression required")
         if trimmed[0] != "(" or trimmed[-1] != ")":
-            raise ValueError("Valid security label expression should be enclosed "
-                             "with brackets (security-label expression)")
+            raise ValueError(
+                "Valid security label expression should be enclosed " "with brackets (security-label expression)"
+            )
         self.or_expressions.append(trimmed)
         return self
 
@@ -133,10 +134,6 @@ class SecurityLabelBuilder(SecurityLabelHelper):
         open_expression = "("
         expression = "&".join(self.labels)
         close_expression = ")" if len(self.or_expressions) == 0 else ")|"
-        base_expression = (
-            ""
-            if len(expression.strip()) == 0
-            else f"{open_expression}{expression}{close_expression}"
-        )
+        base_expression = "" if len(expression.strip()) == 0 else f"{open_expression}{expression}{close_expression}"
         ors = "|".join(self.or_expressions)
         return f"{base_expression}{ors}"

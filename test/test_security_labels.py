@@ -67,9 +67,7 @@ class SecurityLabelBuilderTestCase(unittest.TestCase):
 
         multi_label = pn.construct(test_nationality_1, test_nationality_2)
 
-        self.assertEqual(
-            multi_label, "(permitted_nationalities=GBR|permitted_nationalities=NOR)"
-        )
+        self.assertEqual(multi_label, "(permitted_nationalities=GBR|permitted_nationalities=NOR)")
 
     def test_security_label_builder(self):
         test_org_1 = "telicent"
@@ -103,12 +101,7 @@ class SecurityLabelBuilderTestCase(unittest.TestCase):
             "((permitted_organisations=telicent)&classification=O)",
         )
 
-        slb3 = (
-            SecurityLabelBuilder()
-            .add_or_expression(slb1)
-            .add_or_expression(slb2)
-            .build()
-        )
+        slb3 = SecurityLabelBuilder().add_or_expression(slb1).add_or_expression(slb2).build()
 
         self.assertEqual(
             slb3,
@@ -147,9 +140,7 @@ class SecurityLabelBuilderTestCase(unittest.TestCase):
             SecurityLabelBuilder()
             .add(TelicentSecurityLabelsV2.PERMITTED_ORGANISATIONS.value, test_org_1)
             .add(TelicentSecurityLabelsV2.CLASSIFICATION.value, test_classification)
-            .add_multiple(
-                TelicentSecurityLabelsV2.OR_GROUPS.value, test_or_group_1, test_or_group_2
-            )
+            .add_multiple(TelicentSecurityLabelsV2.OR_GROUPS.value, test_or_group_1, test_or_group_2)
             .add(TelicentSecurityLabelsV2.AND_GROUPS.value, test_and_group)
             .add_multiple(
                 TelicentSecurityLabelsV2.PERMITTED_NATIONALITIES.value,

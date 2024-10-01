@@ -31,7 +31,6 @@ SerialisableDt = Annotated[AwareDatetime, PlainSerializer(lambda x: x.isoformat(
 
 class TelicentMixin(BaseModel):
     def build_security_labels(self):
-        print(self.creationDate)
         builder = SecurityLabelBuilder()
 
         builder.add(TelicentSecurityLabelsV2.CLASSIFICATION.value, self.access.classification)
@@ -45,28 +44,27 @@ class TelicentMixin(BaseModel):
         return builder.build()
 
 
-
 class AccessModel(BaseModel):
     classification: str
     allowedOrgs: list[str]
     allowedNats: list[str]
     groups: list[str]
 
-    @field_validator('classification')
+    @field_validator("classification")
     def non_empty_string(cls, value: str, info):
         if value.strip() == "":
             raise ValueError(f"The {info.field_name} field cannot be an empty string.")
         if value.strip() not in ("O", "OS", "S", "TS"):
             raise ValueError(f"The {info.field_name} field must be 'O', 'OS', 'S' or 'TS'.")
         return value
-    
+
 
 class OwnershipModel(BaseModel):
     originatingOrg: str
     user: str | None = None
 
+
 class IDHModel(TelicentMixin):
-   
     apiVersion: str | None = "v1alpha"
     uuid: str
     creationDate: SerialisableDt | None = DEFAULT_OPTIONAL_DT

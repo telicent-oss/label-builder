@@ -20,7 +20,6 @@ limitations under the License.
 
 
 class AndGroups(MultiValueLabel):
-
     # Something in here needed to get valid group
     def construct(self, *values):
         # assume value is urn
@@ -32,7 +31,6 @@ class AndGroups(MultiValueLabel):
 
 
 class OrGroups(MultiValueLabel):
-
     # Something in here needed to get valid group
     def construct(self, *values):
         # assume value is urn
@@ -47,12 +45,9 @@ class TelicentSecurityLabelsV2(Enum):
     """
     Representation of the Telicent model suitable for SecurityLabelbuilder
     """
-    PERMITTED_ORGANISATIONS = MultiValueLabel(
-        "permitted_organisations", "array"
-    )
-    PERMITTED_NATIONALITIES = MultiValueLabel(
-        "permitted_nationalities", "array"
-    )
+
+    PERMITTED_ORGANISATIONS = MultiValueLabel("permitted_organisations", "array")
+    PERMITTED_NATIONALITIES = MultiValueLabel("permitted_nationalities", "array")
     CLASSIFICATION = SingleValueLabel("classification", "str")
     AND_GROUPS = AndGroups("and_groups", "groups")
     OR_GROUPS = OrGroups("or_groups", "groups")

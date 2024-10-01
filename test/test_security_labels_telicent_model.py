@@ -60,12 +60,7 @@ class SecurityLabelBuilderTestCase(unittest.TestCase):
             "((deployed_organisation=telicent)&clearance=O)",
         )
 
-        slb3 = (
-            SecurityLabelBuilder()
-            .add_or_expression(slb1)
-            .add_or_expression(slb2)
-            .build()
-        )
+        slb3 = SecurityLabelBuilder().add_or_expression(slb1).add_or_expression(slb2).build()
 
         self.assertEqual(
             slb3,

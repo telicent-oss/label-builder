@@ -62,14 +62,15 @@ class TelicentModel(TelicentMixin):
     dispositionProcess: str | None = None
     dissemination: list[str]
 
-    @field_validator('classification')
+    @field_validator("classification")
     def non_empty_string(cls, value: str, info):
         if value.strip() == "":
             raise ValueError(f"The {info.field_name} field cannot be an empty string.")
         return value
 
-    @field_validator('permittedOrgs', 'permittedNats', 'orGroups', 'andGroups', 'dataSet',
-                     'authRef', 'dissemination', mode='before')
+    @field_validator(
+        "permittedOrgs", "permittedNats", "orGroups", "andGroups", "dataSet", "authRef", "dissemination", mode="before"
+    )
     def non_empty_list(cls, value: list[str], info):
         clean_list = [x for x in value if x]
         if not clean_list or len(clean_list) == 0:
