@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter
 from pydantic import AwareDatetime, BaseModel, PlainSerializer, field_validator
 
 from telicent_labels.security_labels import SecurityLabelBuilder
