@@ -5,7 +5,6 @@ from typing import Annotated
 
 from fastapi import APIRouter
 from pydantic import AwareDatetime, BaseModel, PlainSerializer, field_validator
-from telicent_lbapi.rest_service import run_api_service
 
 from telicent_labels.security_labels import SecurityLabelBuilder
 from telicent_labels.telicentv2 import TelicentSecurityLabelsV2
@@ -36,10 +35,6 @@ class TelicentMixin(BaseModel, ABC):
     @abstractmethod
     def build_security_labels(self):
         pass
-
-    @classmethod
-    def run_api(cls, custom_router: APIRouter | None = None):
-        run_api_service(cls, custom_router=custom_router)
 
 
 class TelicentModel(TelicentMixin):
@@ -86,7 +81,3 @@ class TelicentModel(TelicentMixin):
         builder.add_multiple(TelicentSecurityLabelsV2.OR_GROUPS.value, *self.orGroups)
 
         return builder.build()
-
-    @classmethod
-    def run_api(cls, custom_router: APIRouter | None = None):
-        run_api_service(cls, custom_router=custom_router)
