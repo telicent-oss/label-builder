@@ -13,8 +13,4 @@ model in a data processing context.
    - Implementation details of the Telicent model, which integrates with the Security Label Builder.
    - Description of TelicentMixin used to create customer defined models validating data headers.
    - Code example demonstrating the application of Telicent policy in automatic adapters.
-
-4. [Telicent Model Rest Service](./model-as-a-service.md)
-   - Information on wrapping a model around a rest service.
-   - Code examples.
    

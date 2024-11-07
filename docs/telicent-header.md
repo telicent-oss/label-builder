@@ -14,9 +14,6 @@ security and access policies.
       subclasses to utilize the SecurityLabelBuilder for constructing security 
       labels based on model attributes.
      
-   - `run_api(cls, custom_router: APIRouter | None = None):` A class method to initiate the API service using the 
-      model's configuration, leveraging the provided run_api_service function. 
-      Please refer to [Running model as a service](./model-as-a-service.md)
 2. **TelicentModel Class (inherits TelicentMixin)**: Represents the Telicent policy with various attributes.
    - Pro 
 
