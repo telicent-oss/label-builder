@@ -16,4 +16,4 @@ pip install telicent-label-builder
 
 ## Usage
 
-For documentation on how to use telicent-label-builder, please see the [documentation index](docs/index.md).
+For documentation on how to use telicent-label-builder, please see the [documentation index](docs/index.md). 
