@@ -1,4 +1,11 @@
 # Changelog
+## [0.1.7](https://github.com/telicent-oss/label-builder/compare/v0.1.6...v0.1.7) (2024-11-13)
+
+
+### Miscellaneous
+
+* cosmetic change to trigger release-please ([#21](https://github.com/telicent-oss/label-builder/issues/21)) ([b9e9d7e](https://github.com/telicent-oss/label-builder/commit/b9e9d7e1cee74d27e22a6f018f5b6e06d58dc196))
+
 ## 0.1.6 (2024-10-01)
 
 
