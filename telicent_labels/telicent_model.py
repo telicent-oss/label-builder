@@ -5,7 +5,7 @@ from typing import Annotated
 
 from pydantic import AwareDatetime, BaseModel, PlainSerializer, field_validator
 
-from telicent_labels.security_labels import SecurityLabelBuilder
+from telicent_labels.security_labels import _SecurityLabelBuilder
 from telicent_labels.telicentv2 import TelicentSecurityLabelsV2
 
 __license__ = """
@@ -37,8 +37,8 @@ class TelicentMixin(BaseModel, ABC):
 
 
 class TelicentModel(TelicentMixin):
-    apiVersion: str | None = "v1alpha"
-    specification: str | None = "***REDACTED***"
+    apiVersion: str = "v1alpha"
+    specification: str = "IHM"
     identifier: str
     classification: str
     permittedOrgs: list[str]
@@ -46,7 +46,7 @@ class TelicentModel(TelicentMixin):
     orGroups: list[str]
     andGroups: list[str]
 
-    createdDateTime: SerialisableDt | None = DEFAULT_OPTIONAL_DT
+    createdDateTime: SerialisableDt = DEFAULT_OPTIONAL_DT
     originator: str | None = None
     custodian: str | None = None
     policyRef: str | None = None
@@ -62,8 +62,7 @@ class TelicentModel(TelicentMixin):
             raise ValueError(f"The {info.field_name} field cannot be an empty string.")
         return value
 
-    @field_validator('permittedOrgs', 'permittedNats', 'orGroups', 'andGroups', 'dataSet',
-                     'authRef', 'dissemination', mode='before')
+    @field_validator('permittedOrgs', 'permittedNats', mode='before')
     def non_empty_list(cls, value: list[str], info):
         clean_list = [x for x in value if x]
         if not clean_list or len(clean_list) == 0:
@@ -71,7 +70,7 @@ class TelicentModel(TelicentMixin):
         return value
 
     def build_security_labels(self):
-        builder = SecurityLabelBuilder()
+        builder = _SecurityLabelBuilder()
 
         builder.add(TelicentSecurityLabelsV2.CLASSIFICATION.value, self.classification)
         builder.add_multiple(TelicentSecurityLabelsV2.PERMITTED_ORGANISATIONS.value, *self.permittedOrgs)

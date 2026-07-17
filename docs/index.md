@@ -15,7 +15,11 @@ model in a data processing context.
    - Code example demonstrating the application of Telicent policy in automatic adapters.
 
 4. [Model Mixin Examples](./model-mixins.md)
-   - Worked examples for `TelicentModel` (`telicent_model.py`) and `IDHModel` (`idh_model.py`).
+   - Worked examples for `TelicentModel` (`telicent_model.py`), `IDHModel` (`idh_model.py`) and `PolicyInformationModel` (`policy_information_model.py`).
    - Validation behaviour and the resulting Security Label expressions.
-   - How to subclass `TelicentMixin` for a custom header shape.
+   - The single, canonical `TelicentMixin` contract and how to subclass it for a custom header shape.
+
+5. [Schema Reference](./schemas.md)
+   - Field-level schema for `TelicentModel` and `IDHModel`, including the cardinality of every field.
+   - Defaults, validation constraints and the access-control field mapping between the two shapes.
    

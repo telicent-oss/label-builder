@@ -82,7 +82,7 @@ class SecurityLabelHelper:
         raise NotImplementedError()
 
 
-class SecurityLabelBuilder(SecurityLabelHelper):
+class _SecurityLabelBuilder(SecurityLabelHelper):
     """
     Core requires all messages to have a security label.
 
@@ -110,6 +110,8 @@ class SecurityLabelBuilder(SecurityLabelHelper):
         return self
 
     def add_multiple(self, label: MultiValueLabel, *values):
+        if not values:
+            return self
         if label.name in self.used_labels:
             print(
                 "WARNING: Be careful adding multiple expressions with the same label - it could make data inaccessible"
@@ -140,3 +142,8 @@ class SecurityLabelBuilder(SecurityLabelHelper):
         )
         ors = "|".join(self.or_expressions)
         return f"{base_expression}{ors}"
+
+
+# Public alias - the builder is exported as ``SecurityLabelBuilder`` while the
+# implementation class carries the private ``_SecurityLabelBuilder`` name.
+SecurityLabelBuilder = _SecurityLabelBuilder

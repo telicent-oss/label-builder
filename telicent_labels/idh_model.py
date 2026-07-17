@@ -4,8 +4,11 @@ from typing import Annotated
 
 from pydantic import AwareDatetime, BaseModel, PlainSerializer, field_validator
 
-from telicent_labels.security_labels import SecurityLabelBuilder
+from telicent_labels.security_labels import _SecurityLabelBuilder
+from telicent_labels.telicent_model import TelicentMixin
 from telicent_labels.telicentv2 import TelicentSecurityLabelsV2
+
+from telicent_labels.helpers import generate_urn, is_valid_urn
 
 __license__ = """
 Copyright (c) Telicent Ltd.
@@ -26,23 +29,7 @@ limitations under the License.
 log = logging.getLogger(__name__)
 
 DEFAULT_OPTIONAL_DT = datetime(2023, 12, 14, 0, 0, 0, tzinfo=timezone.utc)
-SerialisableDt = Annotated[AwareDatetime, PlainSerializer(lambda x: x.isoformat(), return_type=str, when_used="always")]
-
-
-class TelicentMixin(BaseModel):
-    def build_security_labels(self):
-        print(self.creationDate)
-        builder = SecurityLabelBuilder()
-
-        builder.add(TelicentSecurityLabelsV2.CLASSIFICATION.value, self.access.classification)
-        if len(self.access.allowedOrgs) > 0:
-            builder.add_multiple(TelicentSecurityLabelsV2.PERMITTED_ORGANISATIONS.value, *self.access.allowedOrgs)
-        if len(self.access.allowedNats) > 0:
-            builder.add_multiple(TelicentSecurityLabelsV2.PERMITTED_NATIONALITIES.value, *self.access.allowedNats)
-        if len(self.access.groups) > 0:
-            builder.add_multiple(TelicentSecurityLabelsV2.AND_GROUPS.value, *self.access.groups)
-
-        return builder.build()
+SerialisableDt = Annotated[AwareDatetime, PlainSerializer(lambda x: x.isoformat(), return_type=str, when_used="always")]    
 
 
 
@@ -51,6 +38,7 @@ class AccessModel(BaseModel):
     allowedOrgs: list[str]
     allowedNats: list[str]
     groups: list[str]
+    oneOfGroups: list[str]
 
     @field_validator('classification')
     def non_empty_string(cls, value: str, info):
@@ -60,6 +48,18 @@ class AccessModel(BaseModel):
             raise ValueError(f"The {info.field_name} field must be 'O', 'OS', 'S' or 'TS'.")
         return value
 
+    @field_validator('allowedOrgs', 'allowedNats', mode='before')
+    def non_empty_list(cls, value: list[str], info):
+        clean_list = [x for x in value if x]
+        if not clean_list or len(clean_list) == 0:
+            raise ValueError(f"The {info.field_name} field cannot be an empty list.")
+        return value
+    
+    @field_validator('groups', 'oneOfGroups', mode="before")
+    def ensure_urns(cls, value: list[str], info):
+        clean_list = [group if is_valid_urn(group) else generate_urn(group) for group in value]
+        return clean_list
+
 
 class OwnershipModel(BaseModel):
     originatingOrg: str
@@ -67,13 +67,21 @@ class OwnershipModel(BaseModel):
 
 class IDHModel(TelicentMixin):
 
-    apiVersion: str | None = "v1alpha"
+    apiVersion: str = "v1alpha"
     uuid: str
-    creationDate: SerialisableDt | None = DEFAULT_OPTIONAL_DT
+    creationDate: SerialisableDt = DEFAULT_OPTIONAL_DT
     containsPii: bool
     dataSource: str | None = None
     ownership: OwnershipModel
     access: AccessModel
 
     def build_security_labels(self):
-        return super().build_security_labels()
+        builder = _SecurityLabelBuilder()
+
+        builder.add(TelicentSecurityLabelsV2.CLASSIFICATION.value, self.access.classification)
+        builder.add_multiple(TelicentSecurityLabelsV2.PERMITTED_ORGANISATIONS.value, *self.access.allowedOrgs)
+        builder.add_multiple(TelicentSecurityLabelsV2.PERMITTED_NATIONALITIES.value, *self.access.allowedNats)
+        builder.add_multiple(TelicentSecurityLabelsV2.AND_GROUPS.value, *self.access.groups)
+        builder.add_multiple(TelicentSecurityLabelsV2.OR_GROUPS.value, *self.access.oneOfGroups)
+
+        return builder.build()

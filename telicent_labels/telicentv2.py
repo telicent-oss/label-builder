@@ -24,11 +24,8 @@ class AndGroups(MultiValueLabel):
     # Something in here needed to get valid group
     def construct(self, *values):
         # assume value is urn
-        condition = "&".join(map(self.create_label, values))
+        condition = "&".join(values)
         return condition
-
-    def create_label(self, value: str):
-        return value + ":and"
 
 
 class OrGroups(MultiValueLabel):
@@ -36,11 +33,9 @@ class OrGroups(MultiValueLabel):
     # Something in here needed to get valid group
     def construct(self, *values):
         # assume value is urn
-        condition = "|".join(map(self.create_label, values))
+        condition = "|".join(values)
         return "(" + condition + ")"
 
-    def create_label(self, value: str):
-        return value + ":or"
 
 
 class TelicentSecurityLabelsV2(Enum):
