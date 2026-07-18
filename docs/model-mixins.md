@@ -58,6 +58,9 @@ Validation rules:
 - `orGroups`, `andGroups`, `dataSet`, `authRef` and `dissemination` are
   **required keys** but may be empty lists — empty group lists simply drop out
   of the expression (no stray `&&` or `()`).
+- Each entry in `orGroups` and `andGroups` is normalised to a URN — a bare group
+  name is accepted and expanded to `urn:telicent:groups:<name>`, exactly as for
+  `IDHModel` (see [Group names and URN coercion](#group-names-and-urn-coercion)).
 
 ```python
 from telicent_labels import TelicentModel
@@ -269,9 +272,16 @@ IDHModel(..., access={..., "groups": ["bad<>name"]})
 # -> ValidationError: Group name 'bad<>name' contains invalid characters
 ```
 
-The same coercion applies when you build the header with `build_idh_dict`,
-since it validates through `IDHModel` — passing `groups=["developer"]` yields a
-header whose `access.groups` is `["urn:telicent:groups:developer"]`.
+The same coercion mechanism applies to `TelicentModel.orGroups` and
+`TelicentModel.andGroups` — bare group names passed to either model are expanded
+to `urn:telicent:groups:<name>`.
+
+Note the coercion happens when the **model** is constructed, not in the `dict`
+returned by the `build_idh_dict`/`build_telicent_dict` helpers. Those helpers
+validate through the model but return the header you passed in, so
+`build_idh_dict(groups=["developer"])["access"]["groups"]` is still
+`["developer"]`; splat it into `IDHModel(**header)` and the model's
+`access.groups` becomes `["urn:telicent:groups:developer"]`.
 
 ---
 
@@ -375,6 +385,149 @@ Because `TelicentMixin` is an `ABC` with `build_security_labels` marked
 `@abstractmethod`, forgetting to implement it raises `TypeError` at
 instantiation. If your header matches the IDH access/ownership shape, subclass
 `IDHModel` instead and inherit its `build_security_labels()` for free.
+
+---
+
+#### End-to-end: from helper function to Security Label
+
+The examples above hand-write the nested `dict` that each model expects. In a
+pipeline you usually don't want to assemble that shape by hand — the package
+ships two **helper functions** that build a validated header `dict` from flat
+keyword arguments:
+
+| Helper | Module | Builds a header for |
+| --- | --- | --- |
+| `build_idh_dict` | `builders.py` | `IDHModel` (nested IDH shape). |
+| `build_telicent_dict` | `builders.py` | `TelicentModel` (flat EDH shape). |
+
+Both are importable from the package root:
+
+```python
+from telicent_labels import build_idh_dict, build_telicent_dict
+```
+
+Each helper:
+
+- flattens the nested `access`/`ownership` structure (IDH) into keyword
+  arguments, so you pass `allowed_orgs=[...]` rather than nesting it yourself;
+- fills in sensible defaults — a fresh UUID4 for `uuid`/`identifier`, the
+  current UTC time for the creation/created datetime, and empty lists for the
+  required-but-emptyable group/dataset keys;
+- validates the assembled header through its model by default (`validate=True`),
+  so a malformed payload raises `ValidationError` **at build time** rather than
+  later; and
+- returns a plain `dict` ready to serialise, or to splat straight into the
+  model with `Model(**header)`.
+
+The full flow is therefore **helper → mixin model → `build_security_labels()`**.
+
+##### IDH end-to-end (`build_idh_dict` → `IDHModel`)
+
+```python
+from telicent_labels import IDHModel, build_idh_dict
+
+# 1. Build the header from flat arguments (validated as it is built).
+data_header = build_idh_dict(
+    uuid="doc-123",
+    classification="O",
+    allowed_orgs=["Telicent", "NHS"],
+    allowed_nats=["GBR"],
+    originating_org="Telicent",
+    # Bare group names are accepted — IDHModel coerces them to URNs.
+    groups=["developer"],
+    one_of_groups=["analyst"],
+    data_source="Example Source",
+)
+
+# 2. Instantiate the mixin model from the header.
+model = IDHModel(**data_header)
+
+# 3. Emit the Security Label expression.
+security_label = model.build_security_labels()
+
+# (classification=O
+#  &(permitted_organisations=Telicent|permitted_organisations=NHS)
+#  &(permitted_nationalities=GBR)
+#  &urn:telicent:groups:developer
+#  &(urn:telicent:groups:analyst))
+print(security_label)
+```
+
+Note the group coercion happens **inside `IDHModel`**, not in the returned
+`dict`: `data_header["access"]["groups"]` is still `["developer"]`, while
+`model.access.groups` is `["urn:telicent:groups:developer"]` (see
+[Group names and URN coercion](#group-names-and-urn-coercion)).
+
+##### EDH end-to-end (`build_telicent_dict` → `TelicentModel`)
+
+`TelicentModel` coerces `andGroups` and `orGroups` to Telicent URNs the same
+way `IDHModel` does, so bare group names are accepted here too:
+
+```python
+from telicent_labels import TelicentModel, build_telicent_dict
+
+data_header = build_telicent_dict(
+    identifier="doc-001",
+    classification="S",
+    permitted_orgs=["Telicent", "NHS"],
+    permitted_nats=["GBR", "USA"],
+    # Bare group names are accepted — TelicentModel coerces them to URNs.
+    or_groups=["analyst"],
+    and_groups=["developer"],
+    originator="Alice",
+)
+
+model = TelicentModel(**data_header)
+security_label = model.build_security_labels()
+
+# (classification=S
+#  &(permitted_organisations=Telicent|permitted_organisations=NHS)
+#  &(permitted_nationalities=GBR|permitted_nationalities=USA)
+#  &urn:telicent:groups:developer
+#  &(urn:telicent:groups:analyst))
+print(security_label)
+```
+
+As with `IDHModel`, the coercion happens **inside the model**, not in the
+returned `dict`: `data_header["andGroups"]` is still `["developer"]`, while
+`model.andGroups` is `["urn:telicent:groups:developer"]`.
+
+##### Wrapping in a `PolicyInformationModel`
+
+Because each helper returns a header `dict` that a model accepts, you can feed
+it straight into a `PolicyInformationModel` (which coerces the nested dict to
+the underlying model for you):
+
+```python
+from telicent_labels import PolicyInformationModel, build_idh_dict
+
+policy = PolicyInformationModel(
+    IDH=build_idh_dict(
+        classification="O",
+        allowed_orgs=["Telicent"],
+        allowed_nats=["GBR"],
+        originating_org="Telicent",
+    )
+)
+policy.build_security_labels()
+# -> "(classification=O&(permitted_organisations=Telicent)&(permitted_nationalities=GBR))"
+```
+
+##### Deferring validation
+
+Pass `validate=False` when you deliberately want the raw shape without running
+it through the model — for example to construct a fixture that the model would
+reject:
+
+```python
+build_idh_dict(
+    classification="P",          # not a valid IDH classification
+    allowed_orgs=["Telicent"],
+    allowed_nats=["GBR"],
+    originating_org="Telicent",
+    validate=False,              # skips the IDHModel check; no ValidationError
+)
+```
 
 ---
 

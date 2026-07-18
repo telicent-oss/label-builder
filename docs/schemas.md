@@ -40,8 +40,8 @@ the top level.
 | `classification` | `str` | `1` | — | Must be a non-empty string (after stripping). |
 | `permittedOrgs` | `list[str]` | `1..*` | — | At least one non-empty entry; blank entries are stripped before the emptiness check. |
 | `permittedNats` | `list[str]` | `1..*` | — | At least one non-empty entry; blank entries are stripped before the emptiness check. |
-| `orGroups` | `list[str]` | `0..*` | — | Required key; may be `[]`. Empty ⇒ dropped from the label expression. |
-| `andGroups` | `list[str]` | `0..*` | — | Required key; may be `[]`. Empty ⇒ dropped from the label expression. |
+| `orGroups` | `list[str]` | `0..*` | — | Required key; may be `[]`. Empty ⇒ dropped from the label expression. Each entry is normalised to a URN (see note below). |
+| `andGroups` | `list[str]` | `0..*` | — | Required key; may be `[]`. Empty ⇒ dropped from the label expression. Each entry is normalised to a URN (see note below). |
 | `createdDateTime` | `datetime` | `1` | `DEFAULT_OPTIONAL_DT` | Timezone-aware; serialises to ISO-8601. |
 | `originator` | `str` | `0..1` | `None` | |
 | `custodian` | `str` | `0..1` | `None` | |
@@ -51,6 +51,14 @@ the top level.
 | `dispositionDate` | `datetime` | `0..1` | `DEFAULT_OPTIONAL_DT` | Timezone-aware; serialises to ISO-8601. |
 | `dispositionProcess` | `str` | `0..1` | `None` | |
 | `dissemination` | `list[str]` | `0..*` | — | Required key; may be `[]`. |
+
+> **Group names are coerced to Telicent URNs.** Entries in `orGroups` and
+> `andGroups` need not be full URNs. A value that is already a valid Telicent
+> group URN (`urn:telicent:groups:<name>`) is kept as-is; any other value is
+> treated as a bare group name and expanded to `urn:telicent:groups:<name>`
+> (whitespace trimmed, internal whitespace hyphenated). This is the same
+> coercion `IDHModel` applies to `access.groups`/`access.oneOfGroups`. See
+> [model-mixins.md](./model-mixins.md#group-names-and-urn-coercion).
 
 **Only these fields feed the Security Label expression:** `classification`,
 `permittedOrgs`, `permittedNats`, `andGroups`, `orGroups`. The remaining fields

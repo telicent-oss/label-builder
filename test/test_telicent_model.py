@@ -38,30 +38,33 @@ class TelicentModelEmptyGroupsTestCase(unittest.TestCase):
         )
 
     def test_empty_or_groups_with_and_groups(self):
-        model = TelicentModel(**_base_model_kwargs(orGroups=[], andGroups=["urn:g:a"]))
+        # Bare group names are coerced to urn:telicent:groups:<name>.
+        model = TelicentModel(**_base_model_kwargs(orGroups=[], andGroups=["developer"]))
 
         security_label = model.build_security_labels()
 
         self.assertEqual(
             security_label,
             "(classification=S&(permitted_organisations=orgA)&"
-            "(permitted_nationalities=natA)&urn:g:a)",
+            "(permitted_nationalities=natA)&urn:telicent:groups:developer)",
         )
 
     def test_empty_and_groups_with_or_groups(self):
-        model = TelicentModel(**_base_model_kwargs(orGroups=["urn:g:o"], andGroups=[]))
+        # Bare group names are coerced to urn:telicent:groups:<name>.
+        model = TelicentModel(**_base_model_kwargs(orGroups=["analyst"], andGroups=[]))
 
         security_label = model.build_security_labels()
 
         self.assertEqual(
             security_label,
             "(classification=S&(permitted_organisations=orgA)&"
-            "(permitted_nationalities=natA)&(urn:g:o))",
+            "(permitted_nationalities=natA)&(urn:telicent:groups:analyst))",
         )
 
     def test_both_groups_populated(self):
+        # Bare group names are coerced to urn:telicent:groups:<name>.
         model = TelicentModel(
-            **_base_model_kwargs(orGroups=["urn:g:o"], andGroups=["urn:g:a"])
+            **_base_model_kwargs(orGroups=["analyst"], andGroups=["developer"])
         )
 
         security_label = model.build_security_labels()
@@ -69,7 +72,8 @@ class TelicentModelEmptyGroupsTestCase(unittest.TestCase):
         self.assertEqual(
             security_label,
             "(classification=S&(permitted_organisations=orgA)&"
-            "(permitted_nationalities=natA)&urn:g:a&(urn:g:o))",
+            "(permitted_nationalities=natA)&urn:telicent:groups:developer&"
+            "(urn:telicent:groups:analyst))",
         )
 
     def test_empty_groups_produce_no_stray_operators(self):
