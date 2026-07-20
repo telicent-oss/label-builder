@@ -4,11 +4,10 @@ from typing import Annotated
 
 from pydantic import AwareDatetime, BaseModel, PlainSerializer, field_validator
 
+from telicent_labels.helpers import generate_urn, is_valid_urn
 from telicent_labels.security_labels import _SecurityLabelBuilder
 from telicent_labels.telicent_model import TelicentMixin
 from telicent_labels.telicentv2 import TelicentSecurityLabelsV2
-
-from telicent_labels.helpers import generate_urn, is_valid_urn
 
 __license__ = """
 Copyright (c) Telicent Ltd.
@@ -29,7 +28,7 @@ limitations under the License.
 log = logging.getLogger(__name__)
 
 DEFAULT_OPTIONAL_DT = datetime(2023, 12, 14, 0, 0, 0, tzinfo=timezone.utc)
-SerialisableDt = Annotated[AwareDatetime, PlainSerializer(lambda x: x.isoformat(), return_type=str, when_used="always")]    
+SerialisableDt = Annotated[AwareDatetime, PlainSerializer(lambda x: x.isoformat(), return_type=str, when_used="always")]
 
 
 
@@ -54,7 +53,7 @@ class AccessModel(BaseModel):
         if not clean_list or len(clean_list) == 0:
             raise ValueError(f"The {info.field_name} field cannot be an empty list.")
         return value
-    
+
     @field_validator('groups', 'oneOfGroups', mode="before")
     def ensure_urns(cls, value: list[str], info):
         clean_list = [group if is_valid_urn(group) else generate_urn(group) for group in value]

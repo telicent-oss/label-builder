@@ -5,9 +5,9 @@ from typing import Annotated
 
 from pydantic import AwareDatetime, BaseModel, PlainSerializer, field_validator
 
+from telicent_labels.helpers import generate_urn, is_valid_urn
 from telicent_labels.security_labels import _SecurityLabelBuilder
 from telicent_labels.telicentv2 import TelicentSecurityLabelsV2
-from telicent_labels.helpers import generate_urn, is_valid_urn
 
 __license__ = """
 Copyright (c) Telicent Ltd.
@@ -69,7 +69,7 @@ class TelicentModel(TelicentMixin):
         if not clean_list or len(clean_list) == 0:
             raise ValueError(f"The {info.field_name} field cannot be an empty list.")
         return value
-    
+
     @field_validator('andGroups', 'orGroups', mode="before")
     def ensure_urns(cls, value: list[str], info):
         clean_list = [group if is_valid_urn(group) else generate_urn(group) for group in value]

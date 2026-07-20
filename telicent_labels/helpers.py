@@ -1,6 +1,5 @@
 import logging
 import re
-from typing import Optional, Pattern
 
 __license__ = """
 Copyright (c) Telicent Ltd.

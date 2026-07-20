@@ -1,6 +1,6 @@
 import unittest
 
-from telicent_labels import SecurityLabelBuilder, TelicentSecurityLabelsV2, TelicentModel
+from telicent_labels import SecurityLabelBuilder, TelicentModel, TelicentSecurityLabelsV2
 
 
 def _base_model_kwargs(**overrides):

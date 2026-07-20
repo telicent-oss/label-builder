@@ -1,10 +1,10 @@
 import logging
-from typing import Optional
 
 from pydantic import model_validator
 
 from telicent_labels.idh_model import IDHModel
-from telicent_labels.telicent_model import TelicentModel, TelicentMixin
+from telicent_labels.telicent_model import TelicentMixin, TelicentModel
+
 __license__ = """
 Copyright (c) Telicent Ltd.
 
@@ -24,8 +24,8 @@ limitations under the License.
 log = logging.getLogger(__name__)
 
 class PolicyInformationModel(TelicentMixin):
-    IDH: Optional[IDHModel] = None
-    EDH: Optional[TelicentModel] = None
+    IDH: IDHModel | None = None
+    EDH: TelicentModel | None = None
     policy_object: TelicentMixin | None = None
 
     @model_validator(mode="after")
