@@ -23,3 +23,6 @@ model in a data processing context.
 5. [Schema Reference](./schemas.md)
    - Field-level schema for `TelicentModel` and `IDHModel`, including the cardinality of every field.
    - Defaults, validation constraints and the access-control field mapping between the two shapes.
+
+6. [Reading a label back](./reversibility.md)
+   - Why `parse_security_labels` recovers a label's fields exactly, and what it refuses.

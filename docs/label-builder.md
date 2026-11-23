@@ -41,6 +41,29 @@ labels and allows for complex expressions using logical OR and AND operations.
    
    Method calls can be chained until build is run. 
 
+#### Reading a label back
+
+`parse_security_labels(expression)` is the reverse of `build_security_labels`: it returns, for each
+top-level alternative of the expression, a `ParsedLabel` with the fields the builder was given
+(`generation` `"v2"` or `"v1"`, `classification`, `permitted_organisations`, `permitted_nationalities`,
+`and_groups`, `or_groups`), in order and with repeats. It reads what `TelicentModel`, `IDHModel` and
+the v1 labels write, in any order of `add` calls, with bare or quoted values.
+
+```python
+from telicent_labels import parse_security_labels
+
+[label] = parse_security_labels("(classification=S&(permitted_organisations=telicent)&urn:x:g1:and)")
+label.classification            # "S"
+label.permitted_organisations   # ["telicent"]
+label.and_groups                # ["urn:x:g1"]
+```
+
+It is exact because rdf-abac only accepts a bare value that is a *word*, and the builder's delimiters
+`( ) & | =` are not word characters, so every delimiter in an accepted label is one the builder wrote.
+Anything that is not the builder's shape raises `NotBuilderShape` instead of a guess: a hand-written
+expression, a label with a part given twice, or one the builder wrote before it quoted values, with
+`|`, `&` or `=` inside a value (which rdf-abac read as more than one attribute).
+
 #### Usage Examples
 
 1. **Creating a Single Value Label**
