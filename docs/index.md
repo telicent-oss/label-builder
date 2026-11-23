@@ -13,4 +13,16 @@ model in a data processing context.
    - Implementation details of the Telicent model, which integrates with the Security Label Builder.
    - Description of TelicentMixin used to create customer defined models validating data headers.
    - Code example demonstrating the application of Telicent policy in automatic adapters.
-   
+
+4. [Model Mixin Examples](./model-mixins.md)
+   - Worked examples for `TelicentModel` (`telicent_model.py`), `IDHModel` (`idh_model.py`) and `PolicyInformationModel` (`policy_information_model.py`).
+   - Validation behaviour and the resulting Security Label expressions.
+   - End-to-end flow from the `build_idh_dict`/`build_telicent_dict` helper functions through the mixin models to a Security Label.
+   - The single, canonical `TelicentMixin` contract and how to subclass it for a custom header shape.
+
+5. [Schema Reference](./schemas.md)
+   - Field-level schema for `TelicentModel` and `IDHModel`, including the cardinality of every field.
+   - Defaults, validation constraints and the access-control field mapping between the two shapes.
+
+6. [Reading a label back](./reversibility.md)
+   - Why `parse_security_labels` recovers a label's fields exactly, and what it refuses.

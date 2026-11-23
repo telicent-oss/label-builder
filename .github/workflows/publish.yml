@@ -14,11 +14,13 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        os: ["ubuntu-latest", "windows-latest"]
     uses: telicent-oss/shared-workflows/.github/workflows/python-ci-qa.yml@main
     with:
       PYTHON_VERSION: ${{ matrix.python-version }}
       SKIP_BUILD: true
+      OS: ${{ matrix.os }}
 
   get-version:
     uses: telicent-oss/shared-workflows/.github/workflows/python-get-version-number.yml@main
