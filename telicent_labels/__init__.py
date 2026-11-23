@@ -1,4 +1,6 @@
+from telicent_labels.builders import build_idh_dict, build_telicent_dict
 from telicent_labels.idh_model import IDHModel
+from telicent_labels.policy_information_model import PolicyInformationModel
 from telicent_labels.security_labels import Label, MultiValueLabel, SecurityLabelBuilder, SingleValueLabel
 from telicent_labels.telicent_model import TelicentModel
 from telicent_labels.telicentv1 import TelicentLabelsV1
@@ -29,5 +31,8 @@ __all__ = [
     "SingleValueLabel",
     "Label",
     "TelicentModel",
-    "IDHModel"
+    "IDHModel",
+    "PolicyInformationModel",
+    "build_idh_dict",
+    "build_telicent_dict"
 ]
