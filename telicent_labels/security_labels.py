@@ -15,6 +15,54 @@ limitations under the License.
 """
 
 
+import re
+
+# A bare word as rdf-abac's parser (4.2.1) reads it, which is what its specification's expression
+# grammar says ("Attribute Expressions"): a letter (any script) or underscore, then letters, digits
+# and _ : . - +, ending with a letter, digit or underscore; not the keywords true and false. Anything
+# else must be a quoted string, or the expression is rejected (a space, bracket, quote, #, /, comma,
+# a leading digit, a trailing : . - +) or, worse, read as something else: an unquoted "a|b" is two
+# attributes, "a" or "b", not one value, and "a=b" in a group name is an attribute with a value.
+_WORD = re.compile(r"^(?![0-9])\w(?:[\w:.\-+]*\w)?$")
+_KEYWORDS = {"true", "false"}
+
+
+def is_word(value: str) -> bool:
+    """True if rdf-abac reads ``value`` as one bare attribute or value as it stands."""
+    return bool(_WORD.match(value)) and value not in _KEYWORDS
+
+
+def quote(value: str) -> str:
+    """``value`` as an rdf-abac quoted string, with its escapes (as RDF Turtle's)."""
+    out = ['"']
+    for ch in value:
+        if ch == '"':
+            out.append('\\"')
+        elif ch == "\\":
+            out.append("\\\\")
+        elif ch == "\n":
+            out.append("\\n")
+        elif ch == "\r":
+            out.append("\\r")
+        elif ch == "\t":
+            out.append("\\t")
+        elif ord(ch) < 0x20:
+            out.append(f"\\u{ord(ch):04x}")
+        else:
+            out.append(ch)
+    out.append('"')
+    return "".join(out)
+
+
+def quote_if_needed(value) -> str:
+    """``value`` as rdf-abac reads it as one term: bare if it is a word, quoted otherwise.
+
+    Values that are words come out exactly as before, so no existing label's text changes.
+    """
+    text = str(value)
+    return text if is_word(text) else quote(text)
+
+
 class Label:
 
     """
@@ -30,7 +78,7 @@ class Label:
         self.label_type = label_type
 
     def create_label(self, value):
-        return f"{self.name}={value}"
+        return f"{self.name}={quote_if_needed(value)}"
 
     def construct(self, *values):
         raise NotImplementedError()

@@ -41,6 +41,19 @@ labels and allows for complex expressions using logical OR and AND operations.
    
    Method calls can be chained until build is run. 
 
+#### Values that are not words
+
+rdf-abac reads a bare value only if it is a *word*: a letter or underscore, then letters, digits and
+`_ : . - +`, ending with a letter, digit or underscore, and not `true` or `false`. Any other value (a
+space, a bracket, a quote, `#`, `/`, a comma, a leading digit, a trailing `:`, ...) is written as an
+rdf-abac quoted string, with the same escapes as RDF Turtle, so that rdf-abac reads it as one value.
+Values that are words are written exactly as before, so the text of an existing label does not change.
+
+Before this, an unquoted value containing `|` or `&` was read by rdf-abac as more than one attribute:
+`permitted_organisations=a|b` meant "organisation `a`, or any user holding the attribute `b`". It is now
+`permitted_organisations="a|b"`, one organisation. A group URN is quoted whole when it is not a word:
+the URN grammar allows `=`, `(`, `)`, `,` and `;`, which rdf-abac does not read in a bare word.
+
 #### Usage Examples
 
 1. **Creating a Single Value Label**
