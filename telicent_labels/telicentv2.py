@@ -1,6 +1,6 @@
 from enum import Enum
 
-from telicent_labels.security_labels import MultiValueLabel, SingleValueLabel
+from telicent_labels.security_labels import MultiValueLabel, SingleValueLabel, quote_if_needed
 
 __license__ = """
 Copyright (c) Telicent Ltd.
@@ -23,24 +23,18 @@ class AndGroups(MultiValueLabel):
 
     # Something in here needed to get valid group
     def construct(self, *values):
-        # assume value is urn
-        condition = "&".join(map(self.create_label, values))
+        # assume value is urn; a group that is not a bare rdf-abac word is quoted whole
+        condition = "&".join(map(quote_if_needed, values))
         return condition
-
-    def create_label(self, value: str):
-        return value + ":and"
 
 
 class OrGroups(MultiValueLabel):
 
     # Something in here needed to get valid group
     def construct(self, *values):
-        # assume value is urn
-        condition = "|".join(map(self.create_label, values))
+        # assume value is urn; a group that is not a bare rdf-abac word is quoted whole
+        condition = "|".join(map(quote_if_needed, values))
         return "(" + condition + ")"
-
-    def create_label(self, value: str):
-        return value + ":or"
 
 
 class TelicentSecurityLabelsV2(Enum):

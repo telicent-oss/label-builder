@@ -10,19 +10,17 @@ class SecurityLabelBuilderTestCase(unittest.TestCase):
         test_group_1 = "urn:telicent:groups:role:doctor"
         test_group_2 = "urn:telicent:groups:role:admin"
 
-        basic_label = pn.create_label(test_group_1)
-
-        self.assertEqual(basic_label, "urn:telicent:groups:role:doctor:and")
-
+        # Groups are emitted verbatim; AND membership is expressed by joining
+        # the raw URNs with '&' (no per-group suffix).
         single_group = pn.construct(test_group_1)
 
-        self.assertEqual(single_group, "urn:telicent:groups:role:doctor:and")
+        self.assertEqual(single_group, "urn:telicent:groups:role:doctor")
 
         multi_group = pn.construct(test_group_1, test_group_2)
 
         self.assertEqual(
             multi_group,
-            "urn:telicent:groups:role:doctor:and&urn:telicent:groups:role:admin:and",
+            "urn:telicent:groups:role:doctor&urn:telicent:groups:role:admin",
         )
 
     def test_simple_or_group_label_access(self):
@@ -30,19 +28,16 @@ class SecurityLabelBuilderTestCase(unittest.TestCase):
         test_group_1 = "urn:telicent:groups:role:doctor"
         test_group_2 = "urn:telicent:groups:role:admin"
 
-        basic_label = pn.create_label(test_group_1)
-
-        self.assertEqual(basic_label, "urn:telicent:groups:role:doctor:or")
-
+        # OR membership wraps the raw URNs, joined with '|', in brackets.
         single_group = pn.construct(test_group_1)
 
-        self.assertEqual(single_group, "(urn:telicent:groups:role:doctor:or)")
+        self.assertEqual(single_group, "(urn:telicent:groups:role:doctor)")
 
         multi_group = pn.construct(test_group_1, test_group_2)
 
         self.assertEqual(
             multi_group,
-            "(urn:telicent:groups:role:doctor:or|urn:telicent:groups:role:admin:or)",
+            "(urn:telicent:groups:role:doctor|urn:telicent:groups:role:admin)",
         )
 
     def test_simple_single_label_access(self):
@@ -160,8 +155,8 @@ class SecurityLabelBuilderTestCase(unittest.TestCase):
         )
         self.assertEqual(
             slb,
-            "((permitted_organisations=nhs)&classification=S&(urn:telicent:groups:role:admin:or|"
-            "urn:telicent:groups:role:doctor:or)&urn:telicent:groups:department:vulnerable_care:and&"
+            "((permitted_organisations=nhs)&classification=S&(urn:telicent:groups:role:admin|"
+            "urn:telicent:groups:role:doctor)&urn:telicent:groups:department:vulnerable_care&"
             "(permitted_nationalities=GBR|permitted_nationalities=USA))",
         )
 
